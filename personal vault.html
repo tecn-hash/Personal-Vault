@@ -1,0 +1,3187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Personal Vault — Handwritten Page Archive</title>
+  <!-- Google Fonts: Inter & Newsreader -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+  <style>
+    /* =================================================================
+       1. DESIGN TOKENS & CSS VARIABLES
+       ================================================================= */
+    :root {
+      --bg-cream: #FAF8F5;
+      --bg-paper: #FFFFFF;
+      --bg-sand: #F2EFE9;
+      --bg-sand-hover: #EAE5DC;
+      --text-ink: #1E293B;
+      --text-muted: #64748B;
+      --text-subtle: #94A3B8;
+      --accent-navy: #2B4C7E;
+      --accent-navy-dark: #1E365C;
+      --accent-navy-tint: rgba(43, 76, 126, 0.08);
+      --accent-amber: #D97706;
+      --accent-amber-bg: #FFFBEB;
+      --accent-amber-border: #FDE68A;
+      --border-light: #E7E5E4;
+      --border-medium: #D6D3D1;
+      --danger: #DC2626;
+      --danger-hover: #B91C1C;
+      --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 8px 20px rgba(15, 23, 42, 0.08);
+      --shadow-xl: 0 20px 35px rgba(15, 23, 42, 0.18);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+      --transition-fast: 0.18s ease;
+      --transition-smooth: 0.25s cubic-bezier(0.2, 0, 0.2, 1);
+    }
+
+    /* =================================================================
+       2. RESET & BASE TYPOGRAPHY
+       ================================================================= */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background-color: var(--bg-cream);
+      color: var(--text-ink);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 92px;
+    }
+
+    @media (min-width: 640px) {
+      body {
+        padding-bottom: 48px;
+      }
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .font-editorial {
+      font-family: var(--font-serif);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-cream);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: var(--radius-full);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+
+    /* Icons Sizing */
+    .icon-xs { width: 14px; height: 14px; flex-shrink: 0; }
+    .icon-sm { width: 16px; height: 16px; flex-shrink: 0; }
+    .icon-md { width: 20px; height: 20px; flex-shrink: 0; }
+    .icon-lg { width: 32px; height: 32px; flex-shrink: 0; }
+
+    /* =================================================================
+       3. TOAST NOTIFICATION BANNER
+       ================================================================= */
+    .toast-banner {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      z-index: 100;
+      transform: translateY(-100px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    @media (min-width: 640px) {
+      .toast-banner {
+        left: auto;
+        width: 360px;
+      }
+    }
+
+    .toast-banner.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast-inner {
+      background-color: var(--text-ink);
+      color: #FFFFFF;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .toast-icon {
+      color: #FBBF24;
+      font-weight: 700;
+    }
+
+    /* =================================================================
+       4. STICKY TOP HEADER & BACKUP DROPDOWN
+       ================================================================= */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background-color: rgba(250, 248, 245, 0.94);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .header-container {
+      max-width: 1152px;
+      margin: 0 auto;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .header-container {
+        padding: 16px 24px;
+      }
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background-color: var(--accent-navy);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-xs);
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-ink);
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+    }
+
+    @media (min-width: 640px) {
+      .brand-title {
+        font-size: 1.5rem;
+      }
+    }
+
+    .brand-subtitle {
+      display: none;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    @media (min-width: 640px) {
+      .brand-subtitle {
+        display: block;
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      transition: background-color var(--transition-fast), border-color var(--transition-fast), transform 0.1s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.99);
+    }
+
+    .btn-primary {
+      background-color: var(--accent-navy);
+      color: #FFFFFF;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-navy-dark);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-paper);
+      color: var(--text-ink);
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-xs);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-sand);
+    }
+
+    .btn-icon-only {
+      padding: 10px;
+    }
+
+    .desktop-add-btn {
+      display: none;
+    }
+
+    @media (min-width: 640px) {
+      .desktop-add-btn {
+        display: inline-flex;
+      }
+      .btn-backup {
+        padding: 10px 14px;
+      }
+    }
+
+    .backup-label {
+      display: none;
+    }
+
+    @media (min-width: 768px) {
+      .backup-label {
+        display: inline;
+      }
+    }
+
+    /* Dropdown Menu */
+    .dropdown-wrapper {
+      position: relative;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      width: 224px;
+      background-color: var(--bg-paper);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--border-light);
+      padding: 6px 0;
+      z-index: 40;
+    }
+
+    .dropdown-header {
+      padding: 6px 14px;
+      border-bottom: 1px solid #F5F5F4;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .dropdown-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      font-size: 0.875rem;
+      color: var(--text-ink);
+      text-align: left;
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+    }
+
+    .dropdown-item:hover {
+      background-color: var(--bg-sand);
+    }
+
+    .text-navy { color: var(--accent-navy); }
+    .text-amber { color: var(--accent-amber); }
+
+    /* =================================================================
+       5. MAIN WORKSPACE, SAMPLE BANNER & SEARCH FILTERS
+       ================================================================= */
+    .main-workspace {
+      flex: 1;
+      width: 100%;
+      max-width: 1152px;
+      margin: 0 auto;
+      padding: 24px 16px 0;
+    }
+
+    @media (min-width: 640px) {
+      .main-workspace {
+        padding: 24px 24px 0;
+      }
+    }
+
+    /* Welcome Sample Banner */
+    .sample-banner {
+      margin-bottom: 24px;
+      background-color: var(--accent-amber-bg);
+      border: 1px solid var(--accent-amber-border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .sample-banner {
+        flex-direction: row;
+        align-items: center;
+      }
+    }
+
+    .sample-banner-info {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .sample-badge-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background-color: #FEF3C7;
+      color: #B45309;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      flex-shrink: 0;
+    }
+
+    .sample-banner-title {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-ink);
+    }
+
+    .sample-banner-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .btn-clear-samples {
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-paper);
+      color: #92400E;
+      border: 1px solid #FCD34D;
+      font-size: 0.75rem;
+      font-weight: 600;
+      flex-shrink: 0;
+      transition: background-color var(--transition-fast);
+    }
+
+    .btn-clear-samples:hover {
+      background-color: #FEF3C7;
+    }
+
+    /* Search & Filter Section */
+    .controls-section {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .search-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    @media (min-width: 640px) {
+      .search-row {
+        flex-direction: row;
+      }
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 11px 36px 11px 40px;
+      background-color: var(--bg-paper);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      color: var(--text-ink);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent-navy);
+      box-shadow: 0 0 0 3px var(--accent-navy-tint);
+    }
+
+    .clear-search-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .clear-search-btn:hover {
+      color: var(--text-ink);
+    }
+
+    .pinned-toggle-btn {
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-paper);
+      border: 1px solid var(--border-light);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-shrink: 0;
+      transition: all var(--transition-fast);
+    }
+
+    .pinned-toggle-btn:hover {
+      background-color: var(--bg-sand);
+    }
+
+    .pinned-toggle-btn.active {
+      background-color: var(--accent-amber-bg);
+      border-color: #FCD34D;
+      color: #78350F;
+    }
+
+    .pinned-toggle-btn.active svg {
+      color: #F59E0B;
+    }
+
+    /* Horizontal Scrollable Category Pills */
+    .category-pills-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .category-pills-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
+      font-weight: 500;
+      background-color: var(--bg-paper);
+      color: var(--text-ink);
+      border: 1px solid var(--border-light);
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all var(--transition-fast);
+    }
+
+    .cat-pill:hover {
+      background-color: var(--bg-sand);
+    }
+
+    .cat-pill.active {
+      background-color: var(--accent-navy);
+      color: #FFFFFF;
+      border-color: var(--accent-navy);
+      font-weight: 600;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .cat-pill-manage {
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background-color: var(--bg-cream);
+      border: 1px dashed var(--border-medium);
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all var(--transition-fast);
+    }
+
+    .cat-pill-manage:hover {
+      color: var(--accent-navy);
+      border-color: var(--accent-navy);
+    }
+
+    .cat-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+    }
+
+    /* Category Color Themes */
+    .dot-navy    { background-color: #2563EB; }
+    .dot-amber   { background-color: #F59E0B; }
+    .dot-emerald { background-color: #059669; }
+    .dot-rose    { background-color: #F43F5E; }
+    .dot-indigo  { background-color: #4F46E5; }
+    .dot-teal    { background-color: #0D9488; }
+    .dot-active  { background-color: #FCD34D; }
+
+    .badge-navy    { background-color: #EFF6FF; color: #1E40AF; border-color: #BFDBFE; }
+    .badge-amber   { background-color: #FFFBEB; color: #92400E; border-color: #FDE68A; }
+    .badge-emerald { background-color: #ECFDF5; color: #065F46; border-color: #A7F3D0; }
+    .badge-rose    { background-color: #FFF1F2; color: #9F1239; border-color: #FECDD3; }
+    .badge-indigo  { background-color: #EEF2FF; color: #3730A3; border-color: #C7D2FE; }
+    .badge-teal    { background-color: #F0FDFA; color: #115E59; border-color: #99F6E4; }
+
+    /* Archive Stats Bar */
+    .stats-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding: 0 2px;
+    }
+
+    /* =================================================================
+       6. ENTRIES GRID & NOTEBOOK CARDS
+       ================================================================= */
+    .entries-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    @media (min-width: 640px) {
+      .entries-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .entries-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .entry-card {
+      background-color: var(--bg-paper);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+      box-shadow: var(--shadow-xs);
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .entry-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-medium);
+    }
+
+    .card-thumb-wrap {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      background-color: var(--bg-sand);
+      overflow: hidden;
+      border-bottom: 1px solid #F5F5F4;
+    }
+
+    .card-thumb-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      transition: transform 0.35s ease;
+    }
+
+    .entry-card:hover .card-thumb-img {
+      transform: scale(1.025);
+    }
+
+    .card-top-overlay {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .sample-pill {
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      background-color: rgba(254, 243, 199, 0.96);
+      color: #78350F;
+      border: 1px solid #FCD34D;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .pin-btn {
+      padding: 8px;
+      border-radius: var(--radius-md);
+      background-color: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(6px);
+      color: #475569;
+      box-shadow: var(--shadow-xs);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color var(--transition-fast), color var(--transition-fast);
+    }
+
+    .pin-btn:hover {
+      background-color: #FFFFFF;
+      color: var(--accent-amber);
+    }
+
+    .pin-btn.pinned {
+      background-color: #FBBF24;
+      color: #0F172A;
+    }
+
+    .card-bottom-overlay {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+    }
+
+    .page-count-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      background-color: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(4px);
+      color: #FFFFFF;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .page-count-badge svg {
+      color: #FCD34D;
+    }
+
+    .card-body {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .category-badge {
+      padding: 2px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-date {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      font-family: var(--font-serif);
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-ink);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      transition: color var(--transition-fast);
+    }
+
+    .entry-card:hover .card-title {
+      color: var(--accent-navy);
+    }
+
+    .card-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-note-empty {
+      font-size: 0.75rem;
+      color: var(--text-subtle);
+      font-style: italic;
+      margin-top: 6px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      background-color: var(--bg-paper);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-xl);
+      padding: 40px 24px;
+      text-align: center;
+      max-width: 512px;
+      margin: 32px auto;
+      box-shadow: var(--shadow-xs);
+    }
+
+    @media (min-width: 640px) {
+      .empty-state {
+        padding: 56px 40px;
+      }
+    }
+
+    .empty-icon-box {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-lg);
+      background-color: var(--bg-sand);
+      color: var(--accent-navy);
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-title {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-ink);
+    }
+
+    .empty-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+
+    .empty-action-btn {
+      margin-top: 24px;
+      padding: 12px 20px;
+    }
+
+    /* =================================================================
+       7. MOBILE STICKY BOTTOM ACTION BAR
+       ================================================================= */
+    .mobile-bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 30;
+      background-color: rgba(250, 248, 245, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border-light);
+      padding: 12px 16px;
+    }
+
+    @media (min-width: 640px) {
+      .mobile-bottom-bar {
+        display: none;
+      }
+    }
+
+    .mobile-capture-btn {
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: var(--radius-lg);
+      background-color: var(--accent-navy);
+      color: #FFFFFF;
+      font-size: 0.875rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .mobile-capture-btn:active {
+      background-color: var(--accent-navy-dark);
+    }
+
+    /* =================================================================
+       8. MODALS (ADD/EDIT ENTRY & CATEGORY MANAGER)
+       ================================================================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background-color: rgba(15, 23, 42, 0.62);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+      overflow-y: auto;
+    }
+
+    @media (min-width: 640px) {
+      .modal-backdrop {
+        align-items: center;
+        padding: 16px;
+      }
+    }
+
+    .modal-backdrop.centered {
+      align-items: center;
+      padding: 16px;
+    }
+
+    .modal-dialog {
+      background-color: var(--bg-paper);
+      width: 100%;
+      max-width: 672px;
+      border-radius: 24px 24px 0 0;
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--border-light);
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    @media (min-width: 640px) {
+      .modal-dialog {
+        border-radius: var(--radius-xl);
+      }
+    }
+
+    .modal-dialog-sm {
+      max-width: 448px;
+      border-radius: var(--radius-xl);
+    }
+
+    .modal-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #F5F5F4;
+      background-color: rgba(250, 248, 245, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .modal-title {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-ink);
+    }
+
+    .modal-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .modal-close-btn {
+      padding: 8px;
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color var(--transition-fast), color var(--transition-fast);
+    }
+
+    .modal-close-btn:hover {
+      background-color: #F5F5F4;
+      color: var(--text-ink);
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #F5F5F4;
+      background-color: rgba(250, 248, 245, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    /* Form Controls */
+    .form-label {
+      display: block;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .form-label-hint {
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--text-muted);
+    }
+
+    .capture-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .capture-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .capture-tile {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px;
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .capture-tile-camera {
+      border: 2px solid rgba(43, 76, 126, 0.28);
+      background-color: rgba(43, 76, 126, 0.05);
+      color: var(--accent-navy);
+    }
+
+    .capture-tile-camera:hover {
+      background-color: rgba(43, 76, 126, 0.11);
+    }
+
+    .capture-tile-gallery {
+      border: 2px dashed var(--border-medium);
+      background-color: rgba(250, 248, 245, 0.7);
+      color: var(--text-ink);
+    }
+
+    .capture-tile-gallery:hover {
+      border-color: var(--accent-navy);
+      background-color: var(--bg-sand);
+    }
+
+    .drop-zone {
+      border: 1px dashed var(--border-medium);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background-color: rgba(250, 248, 245, 0.45);
+      transition: all var(--transition-fast);
+    }
+
+    .drop-zone.drag-active {
+      border-color: var(--accent-navy);
+      background-color: var(--accent-navy-tint);
+      color: var(--accent-navy);
+    }
+
+    .processing-banner {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--accent-navy);
+      background-color: var(--accent-navy-tint);
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .spinner-icon {
+      width: 16px;
+      height: 16px;
+      animation: spin 0.9s linear infinite;
+    }
+
+    .draft-pages-grid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .draft-pages-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .draft-thumb {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      background-color: var(--bg-sand);
+    }
+
+    .draft-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .draft-page-tag {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background-color: rgba(15, 23, 42, 0.82);
+      color: #FFFFFF;
+      font-size: 0.625rem;
+      font-weight: 600;
+    }
+
+    .draft-remove-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-full);
+      background-color: var(--danger);
+      color: #FFFFFF;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-xs);
+      transition: background-color var(--transition-fast);
+    }
+
+    .draft-remove-btn:hover {
+      background-color: var(--danger-hover);
+    }
+
+    .form-row-split {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 640px) {
+      .form-row-split {
+        grid-template-columns: 2fr 1fr;
+      }
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      background-color: rgba(250, 248, 245, 0.55);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      color: var(--text-ink);
+      transition: background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .form-control:focus {
+      outline: none;
+      background-color: var(--bg-paper);
+      border-color: var(--accent-navy);
+      box-shadow: 0 0 0 3px var(--accent-navy-tint);
+    }
+
+    .label-row-between {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .label-row-between .form-label {
+      margin-bottom: 0;
+    }
+
+    .link-action-btn {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-navy);
+    }
+
+    .link-action-btn:hover {
+      text-decoration: underline;
+    }
+
+    .inline-cat-creator {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-sand);
+      border: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .inline-cat-input {
+      flex: 1;
+      padding: 7px 12px;
+      background-color: var(--bg-paper);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+    }
+
+    .inline-cat-input:focus {
+      outline: none;
+      border-color: var(--accent-navy);
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      padding-top: 4px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-ink);
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent-navy);
+      cursor: pointer;
+    }
+
+    /* Category Manager List */
+    .cat-add-form {
+      display: flex;
+      gap: 8px;
+    }
+
+    .cat-manager-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .cat-manager-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      background-color: rgba(250, 248, 245, 0.8);
+      border: 1px solid var(--border-light);
+    }
+
+    .cat-manager-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .cat-manager-count {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .cat-default-tag {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+    }
+
+    .cat-remove-btn {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--danger);
+    }
+
+    .cat-remove-btn:hover {
+      text-decoration: underline;
+    }
+
+    /* =================================================================
+       9. FULLSCREEN HANDWRITING READER & LIGHTBOX
+       ================================================================= */
+    .reader-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background-color: rgba(2, 6, 23, 0.96);
+      color: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .reader-topbar {
+      padding: 14px 16px;
+      background-color: rgba(15, 23, 42, 0.92);
+      border-bottom: 1px solid #1E293B;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    @media (min-width: 640px) {
+      .reader-topbar {
+        padding: 14px 24px;
+      }
+    }
+
+    .reader-meta {
+      min-width: 0;
+    }
+
+    .reader-badges {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .reader-cat-badge {
+      padding: 2px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 500;
+      background-color: var(--accent-navy);
+      color: #FFFFFF;
+      flex-shrink: 0;
+    }
+
+    .reader-date-text {
+      font-size: 0.75rem;
+      color: #94A3B8;
+      flex-shrink: 0;
+    }
+
+    .reader-entry-title {
+      font-family: var(--font-serif);
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #FFFFFF;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (min-width: 640px) {
+      .reader-entry-title {
+        font-size: 1.25rem;
+      }
+    }
+
+    .reader-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .reader-btn {
+      padding: 10px;
+      border-radius: var(--radius-md);
+      background-color: #1E293B;
+      color: #E2E8F0;
+      font-size: 0.75rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color var(--transition-fast);
+    }
+
+    .reader-btn:hover {
+      background-color: #334155;
+    }
+
+    .reader-btn-zoom {
+      padding: 10px 12px;
+    }
+
+    .zoom-text-label {
+      display: none;
+    }
+
+    @media (min-width: 640px) {
+      .zoom-text-label {
+        display: inline;
+      }
+    }
+
+    .reader-btn-danger {
+      padding: 10px 12px;
+      color: #FDA4AF;
+    }
+
+    .reader-btn-danger:hover {
+      background-color: rgba(136, 19, 55, 0.75);
+    }
+
+    .reader-btn-danger.armed {
+      background-color: var(--danger);
+      color: #FFFFFF;
+    }
+
+    .reader-btn-close {
+      background-color: #1E293B;
+      color: #FFFFFF;
+      margin-left: 4px;
+    }
+
+    /* Main Image Stage */
+    .reader-stage {
+      flex: 1;
+      position: relative;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      user-select: none;
+    }
+
+    @media (min-width: 640px) {
+      .reader-stage {
+        padding: 32px;
+      }
+    }
+
+    .reader-stage.zoomed {
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+
+    .reader-image {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      cursor: zoom-in;
+      transition: width var(--transition-smooth);
+    }
+
+    .reader-image.zoomed {
+      width: 155%;
+      max-width: none;
+      max-height: none;
+      cursor: zoom-out;
+    }
+
+    @media (min-width: 640px) {
+      .reader-image.zoomed {
+        width: 135%;
+      }
+    }
+
+    .reader-nav-arrow {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 20;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-full);
+      background-color: rgba(15, 23, 42, 0.86);
+      color: #FFFFFF;
+      border: 1px solid #334155;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color var(--transition-fast), opacity var(--transition-fast);
+    }
+
+    .reader-nav-arrow:hover:not(:disabled) {
+      background-color: var(--accent-navy);
+    }
+
+    .reader-nav-arrow:disabled {
+      opacity: 0.28;
+      pointer-events: none;
+    }
+
+    .reader-nav-prev { left: 12px; }
+    .reader-nav-next { right: 12px; }
+
+    @media (min-width: 640px) {
+      .reader-nav-prev { left: 24px; }
+      .reader-nav-next { right: 24px; }
+    }
+
+    /* Reader Bottom Bar */
+    .reader-bottombar {
+      background-color: rgba(15, 23, 42, 0.96);
+      border-top: 1px solid #1E293B;
+      padding: 12px 16px;
+      flex-shrink: 0;
+    }
+
+    @media (min-width: 640px) {
+      .reader-bottombar {
+        padding: 12px 24px;
+      }
+    }
+
+    .reader-bottom-inner {
+      max-width: 896px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .reader-bottom-inner {
+        flex-direction: row;
+        align-items: center;
+      }
+    }
+
+    .reader-note-quote {
+      font-size: 0.8125rem;
+      color: #CBD5E1;
+      font-style: italic;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .reader-pager-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      align-self: flex-end;
+      flex-shrink: 0;
+    }
+
+    @media (min-width: 640px) {
+      .reader-pager-group {
+        align-self: center;
+      }
+    }
+
+    .reader-page-counter {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #94A3B8;
+    }
+
+    .reader-thumbs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .reader-thumb-btn {
+      width: 32px;
+      height: 40px;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 2px solid #334155;
+      opacity: 0.6;
+      transition: all var(--transition-fast);
+    }
+
+    .reader-thumb-btn:hover {
+      opacity: 1;
+    }
+
+    .reader-thumb-btn.active {
+      border-color: #FBBF24;
+      opacity: 1;
+      transform: scale(1.06);
+    }
+
+    .reader-thumb-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Notification Banner -->
+  <div id="toast" class="toast-banner" role="status" aria-live="polite">
+    <div class="toast-inner">
+      <span id="toast-icon" class="toast-icon">✓</span>
+      <span id="toast-message">Saved to your vault</span>
+    </div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-group">
+        <div class="brand-logo" aria-hidden="true">
+          <svg class="icon-md" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">My Personal Vault</h1>
+          <p class="brand-subtitle">All your handwritten pages &amp; notebooks in one calm place</p>
+        </div>
+      </div>
+
+      <!-- Desktop & Tablet Actions -->
+      <div class="header-actions">
+        <!-- Backup / Restore Dropdown -->
+        <div class="dropdown-wrapper" id="backup-menu-wrapper">
+          <button id="backup-menu-btn" type="button" class="btn btn-secondary btn-icon-only btn-backup" title="Backup or Restore Vault">
+            <svg class="icon-sm" style="color: var(--text-muted);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            <span class="backup-label">Backup</span>
+          </button>
+
+          <div id="backup-dropdown" class="dropdown-menu hidden">
+            <div class="dropdown-header">Vault Data</div>
+            <button id="export-json-btn" type="button" class="dropdown-item">
+              <svg class="icon-sm text-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              <span>Export Backup (.json)</span>
+            </button>
+            <label for="import-json-input" class="dropdown-item">
+              <svg class="icon-sm text-amber" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              <span>Import Backup (.json)</span>
+            </label>
+            <input id="import-json-input" type="file" accept=".json,application/json" class="hidden" />
+          </div>
+        </div>
+
+        <!-- Primary Add Button (Visible on Desktop/Tablet) -->
+        <button id="open-add-modal-top" type="button" class="btn btn-primary desktop-add-btn">
+          <svg class="icon-sm" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Add Handwritten Page</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="main-workspace">
+
+    <!-- Sample Banner (Shown only when sample cards exist) -->
+    <div id="sample-banner" class="sample-banner hidden">
+      <div class="sample-banner-info">
+        <span class="sample-badge-icon" aria-hidden="true">✨</span>
+        <div>
+          <p class="sample-banner-title">Welcome! We included 3 sample notebook entries to show how your archive looks.</p>
+          <p class="sample-banner-desc">Snap your own pages anytime—or clear the sample entries whenever you're ready.</p>
+        </div>
+      </div>
+      <button id="clear-samples-btn" type="button" class="btn-clear-samples">
+        Remove Sample Entries
+      </button>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <section class="controls-section" aria-label="Search and filter entries">
+      <div class="search-row">
+        <!-- Instant Search Input -->
+        <div class="search-box">
+          <svg class="icon-sm search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input id="search-input" type="text" class="search-input" placeholder="Search titles, quick notes, categories, or dates (e.g., 2026-11)..." />
+          <button id="clear-search-btn" type="button" class="clear-search-btn hidden" title="Clear search">
+            <svg class="icon-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Pinned / Favorites Filter Toggle -->
+        <button id="toggle-pinned-btn" type="button" class="pinned-toggle-btn">
+          <svg id="pinned-filter-icon" class="icon-sm" style="color: var(--text-muted);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+          </svg>
+          <span>Pinned Only</span>
+        </button>
+      </div>
+
+      <!-- Category Pills & Manage Categories -->
+      <div class="category-pills-row" id="category-pills-container">
+        <!-- Rendered dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- Archive Stats Bar -->
+    <div class="stats-bar">
+      <span id="archive-count-label">Showing 0 entries</span>
+      <span id="total-pages-label">0 total handwritten pages stored</span>
+    </div>
+
+    <!-- Entries Grid -->
+    <section id="entries-grid" class="entries-grid" aria-label="Handwritten entries">
+      <!-- Cards rendered dynamically via JS -->
+    </section>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state hidden">
+      <div class="empty-icon-box" aria-hidden="true">
+        <svg class="icon-lg" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </div>
+      <h2 id="empty-title" class="empty-title">No handwritten pages here yet</h2>
+      <p id="empty-subtitle" class="empty-subtitle">Snap a photo of any page from your physical notebooks to keep it safe, organized, and searchable in one place.</p>
+      <button id="empty-add-btn" type="button" class="btn btn-primary empty-action-btn">
+        <svg class="icon-sm" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        <span>Capture Your First Page</span>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Mobile Sticky Bottom Action Bar -->
+  <div class="mobile-bottom-bar">
+    <button id="open-add-modal-mobile" type="button" class="mobile-capture-btn">
+      <svg class="icon-md" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+      <span>Snap or Upload Handwritten Page</span>
+    </button>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 1: ADD / EDIT HANDWRITTEN ENTRY MODAL               -->
+  <!-- ========================================================= -->
+  <div id="entry-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="entry-modal-title">
+    <div class="modal-dialog">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div>
+          <h2 id="entry-modal-title" class="modal-title">Add Handwritten Page</h2>
+          <p class="modal-subtitle">Snap photos or upload multiple pages from your notebook</p>
+        </div>
+        <button id="close-entry-modal" type="button" class="modal-close-btn" title="Close">
+          <svg class="icon-md" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Form Body -->
+      <form id="entry-form" class="modal-body">
+        <input type="hidden" id="entry-id" />
+
+        <!-- Photo Capture & Upload Zone -->
+        <div>
+          <label class="form-label">Handwritten Page Photos *</label>
+
+          <div class="capture-grid">
+            <!-- Direct Camera Button -->
+            <label for="camera-capture-input" class="capture-tile capture-tile-camera">
+              <svg class="icon-md" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>Take Photo (Camera)</span>
+            </label>
+            <input id="camera-capture-input" type="file" accept="image/*" capture="environment" class="hidden" />
+
+            <!-- Gallery / Multi-Page Upload -->
+            <label for="gallery-upload-input" class="capture-tile capture-tile-gallery">
+              <svg class="icon-md" style="color: var(--text-muted);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span>Choose Photos (Multi-Page)</span>
+            </label>
+            <input id="gallery-upload-input" type="file" accept="image/*" multiple class="hidden" />
+          </div>
+
+          <!-- Drag and Drop Area -->
+          <div id="drop-zone" class="drop-zone">
+            Or drag &amp; drop notebook page images here (automatically compressed for fast storage)
+          </div>
+
+          <!-- Processing Spinner -->
+          <div id="image-processing-indicator" class="processing-banner hidden">
+            <svg class="spinner-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Optimizing handwritten page clarity &amp; size...</span>
+          </div>
+
+          <!-- Uploaded Thumbnails Preview Strip -->
+          <div id="uploaded-pages-preview" class="draft-pages-grid">
+            <!-- Thumbnails injected dynamically -->
+          </div>
+        </div>
+
+        <!-- Title & Date Row -->
+        <div class="form-row-split">
+          <div>
+            <label for="entry-title" class="form-label">Page / Entry Title *</label>
+            <input id="entry-title" type="text" class="form-control" required placeholder="e.g., Sunday Reflections, Project Sketch, Weekly Plan..." />
+          </div>
+          <div>
+            <label for="entry-date" class="form-label">Date</label>
+            <input id="entry-date" type="date" class="form-control" required />
+          </div>
+        </div>
+
+        <!-- Category Selection -->
+        <div>
+          <div class="label-row-between">
+            <label for="entry-category" class="form-label">Category / Notebook Section</label>
+            <button id="quick-new-cat-toggle" type="button" class="link-action-btn">+ New Category</button>
+          </div>
+          <select id="entry-category" class="form-control">
+            <!-- Categories populated via JS -->
+          </select>
+
+          <!-- Inline New Category Creator -->
+          <div id="quick-new-cat-box" class="inline-cat-creator hidden">
+            <input id="quick-new-cat-name" type="text" class="inline-cat-input" placeholder="Category name (e.g., Dreams, Recipes)..." />
+            <button id="quick-new-cat-save" type="button" class="btn btn-primary" style="padding: 7px 14px; font-size: 0.75rem;">Add</button>
+          </div>
+        </div>
+
+        <!-- Quick Searchable Summary / Keywords -->
+        <div>
+          <label for="entry-note" class="form-label">
+            Quick Summary or Keywords <span class="form-label-hint">(Optional — makes finding this handwritten page effortless later)</span>
+          </label>
+          <textarea id="entry-note" rows="3" class="form-control" placeholder="Jot down a few words or tags about what's written on these pages so you can search for it later..."></textarea>
+        </div>
+
+        <!-- Pin Checkbox -->
+        <label class="checkbox-row">
+          <input id="entry-pinned" type="checkbox" />
+          <span>Pin this entry to the top of my vault</span>
+        </label>
+      </form>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button id="cancel-entry-modal" type="button" class="btn btn-secondary">Cancel</button>
+        <button id="save-entry-btn" type="submit" form="entry-form" class="btn btn-primary">Save to Vault</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 2: FULLSCREEN HANDWRITING READER & LIGHTBOX         -->
+  <!-- ========================================================= -->
+  <div id="reader-modal" class="reader-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="reader-title">
+    <!-- Top Reader Bar -->
+    <div class="reader-topbar">
+      <div class="reader-meta">
+        <div class="reader-badges">
+          <span id="reader-category-badge" class="reader-cat-badge">Category</span>
+          <span id="reader-date" class="reader-date-text">2026-11-26</span>
+        </div>
+        <h2 id="reader-title" class="reader-entry-title">Entry Title</h2>
+      </div>
+
+      <!-- Reader Actions -->
+      <div class="reader-actions">
+        <!-- Zoom Toggle -->
+        <button id="reader-zoom-btn" type="button" class="reader-btn reader-btn-zoom" title="Toggle Zoom to Read Handwriting">
+          <svg class="icon-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+          </svg>
+          <span id="reader-zoom-label" class="zoom-text-label">Zoom In</span>
+        </button>
+
+        <!-- Edit Entry -->
+        <button id="reader-edit-btn" type="button" class="reader-btn" title="Edit Entry">
+          <svg class="icon-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        </button>
+
+        <!-- Delete Entry (Inline 2-step confirmation, never alert/confirm) -->
+        <button id="reader-delete-btn" type="button" class="reader-btn reader-btn-danger" title="Delete Entry">
+          <svg class="icon-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          <span id="reader-delete-label">Delete</span>
+        </button>
+
+        <!-- Close Reader -->
+        <button id="close-reader-btn" type="button" class="reader-btn reader-btn-close" title="Close Reader">
+          <svg class="icon-md" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Image Stage -->
+    <div id="reader-image-viewport" class="reader-stage">
+      <!-- Prev Page Button -->
+      <button id="reader-prev-btn" type="button" class="reader-nav-arrow reader-nav-prev" title="Previous Page">
+        <svg class="icon-md" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      <!-- Active Page Image -->
+      <img id="reader-active-image" src="" alt="Handwritten notebook page" class="reader-image" />
+
+      <!-- Next Page Button -->
+      <button id="reader-next-btn" type="button" class="reader-nav-arrow reader-nav-next" title="Next Page">
+        <svg class="icon-md" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Bottom Page Strip & Note Summary -->
+    <div class="reader-bottombar">
+      <div class="reader-bottom-inner">
+        <p id="reader-note-text" class="reader-note-quote"></p>
+
+        <div class="reader-pager-group">
+          <span id="reader-page-counter" class="reader-page-counter">Page 1 of 1</span>
+          <div id="reader-thumbnails" class="reader-thumbs">
+            <!-- Mini page switchers injected dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 3: MANAGE CUSTOM CATEGORIES MODAL                   -->
+  <!-- ========================================================= -->
+  <div id="category-modal" class="modal-backdrop centered hidden" role="dialog" aria-modal="true" aria-labelledby="cat-modal-title">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <h3 id="cat-modal-title" class="modal-title" style="font-size: 1.125rem;">Notebook Categories</h3>
+        <button id="close-category-modal" type="button" class="modal-close-btn" title="Close">
+          <svg class="icon-md" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" style="gap: 16px;">
+        <form id="add-category-form" class="cat-add-form">
+          <input id="new-category-input" type="text" class="form-control" required placeholder="e.g., Book Notes, Sketches, Finance..." />
+          <button type="submit" class="btn btn-primary">Add</button>
+        </form>
+        <div id="category-manager-list" class="cat-manager-list">
+          <!-- Category items injected dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- APPLICATION LOGIC (IndexedDB, Compression, UI & Reader)   -->
+  <!-- ========================================================= -->
+  <script>
+    (function () {
+      'use strict';
+
+      // ---------------------------------------------------------
+      // 1. DEFAULT CATEGORIES & COLOR PALETTE
+      // ---------------------------------------------------------
+      const CATEGORY_COLORS = [
+        { name: 'Navy',    badgeClass: 'badge-navy',    dotClass: 'dot-navy' },
+        { name: 'Amber',   badgeClass: 'badge-amber',   dotClass: 'dot-amber' },
+        { name: 'Emerald', badgeClass: 'badge-emerald', dotClass: 'dot-emerald' },
+        { name: 'Rose',    badgeClass: 'badge-rose',    dotClass: 'dot-rose' },
+        { name: 'Indigo',  badgeClass: 'badge-indigo',  dotClass: 'dot-indigo' },
+        { name: 'Teal',    badgeClass: 'badge-teal',    dotClass: 'dot-teal' },
+      ];
+
+      const DEFAULT_CATEGORIES = [
+        { id: 'cat-daily',     name: 'Daily & Reflections', colorIdx: 0, isDefault: true },
+        { id: 'cat-goals',     name: 'Goals & Plans',       colorIdx: 2, isDefault: true },
+        { id: 'cat-ideas',     name: 'Ideas & Inspo',       colorIdx: 1, isDefault: true },
+        { id: 'cat-important', name: 'Important & Keep',    colorIdx: 3, isDefault: true },
+      ];
+
+      // ---------------------------------------------------------
+      // 2. SAMPLE HANDWRITTEN NOTEBOOK PAGE GENERATOR (SVG -> DataURL)
+      //    Creates offline lined-paper handwritten SVG previews so
+      //    sample entries work immediately with zero external URLs.
+      // ---------------------------------------------------------
+      function escapeXml(unsafe) {
+        return String(unsafe)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&apos;');
+      }
+
+      function createSamplePageIllustration(heading, lines, accentColor = '#2B4C7E', pageTag = 'Page 1') {
+        const ruledLines = Array.from({ length: 14 }, (_, i) => {
+          const y = 110 + i * 32;
+          return `<line x1="48" y1="${y}" x2="552" y2="${y}" stroke="#CBD5E1" stroke-width="1" />`;
+        }).join('');
+
+        const handwrittenText = lines.map((line, i) => {
+          const y = 135 + i * 32;
+          return `<text x="78" y="${y}" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="17" fill="#1E293B" opacity="0.9">${escapeXml(line)}</text>`;
+        }).join('');
+
+        const svg = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="600" height="760" viewBox="0 0 600 760">
+            <rect width="600" height="760" fill="#FDFBF7" />
+            <line x1="66" y1="0" x2="66" y2="760" stroke="#FCA5A5" stroke-width="1.5" />
+            <circle cx="28" cy="95" r="9" fill="#E2E8F0" />
+            <circle cx="28" cy="245" r="9" fill="#E2E8F0" />
+            <circle cx="28" cy="395" r="9" fill="#E2E8F0" />
+            <circle cx="28" cy="545" r="9" fill="#E2E8F0" />
+            <circle cx="28" cy="695" r="9" fill="#E2E8F0" />
+            ${ruledLines}
+            <text x="78" y="68" font-family="Georgia, serif" font-weight="bold" font-size="22" fill="${accentColor}">${escapeXml(heading)}</text>
+            <text x="545" y="68" text-anchor="end" font-family="sans-serif" font-size="12" fill="#64748B">${escapeXml(pageTag)}</text>
+            <line x1="78" y1="80" x2="545" y2="80" stroke="${accentColor}" stroke-width="1.5" opacity="0.4" />
+            ${handwrittenText}
+            <rect x="365" y="685" width="180" height="34" rx="8" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.2" />
+            <text x="455" y="707" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="12" fill="#B45309">SAMPLE SCAN PREVIEW</text>
+          </svg>
+        `.trim();
+
+        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+      }
+
+      function buildInitialSampleEntries() {
+        const today = getTodayISO();
+        return [
+          {
+            id: 'sample-1',
+            title: 'Evening Mind Dump & Gratitude',
+            date: today,
+            categoryId: 'cat-daily',
+            note: 'Quiet evening thoughts from my blue pocket notebook — letting go of busy week stress and focusing on three good moments.',
+            pinned: true,
+            isSample: true,
+            createdAt: Date.now() - 1000,
+            pages: [
+              createSamplePageIllustration(
+                'Evening Mind Dump',
+                [
+                  '1. Finished organizing my desk & workspace.',
+                  '2. Had a peaceful walk before sunset.',
+                  '3. Reminder: slow down and take things',
+                  '   one step at a time instead of rushing.',
+                  '',
+                  'Note to self: Keep all my loose pages',
+                  'in one vault so nothing gets lost again!'
+                ],
+                '#2B4C7E',
+                'Notebook A • p.14'
+              )
+            ]
+          },
+          {
+            id: 'sample-2',
+            title: 'Monthly Priorities & Action Steps',
+            date: today,
+            categoryId: 'cat-goals',
+            note: 'Two-page spread outlining personal milestones, health habits, and weekend project steps.',
+            pinned: false,
+            isSample: true,
+            createdAt: Date.now() - 2000,
+            pages: [
+              createSamplePageIllustration(
+                'Top 3 Priorities This Month',
+                [
+                  '• Focus Area 1: Consistent morning routine',
+                  '• Focus Area 2: Finish reading current book',
+                  '• Focus Area 3: Save & organize all notes',
+                  '',
+                  'Weekly Check-in:',
+                  '- Keep distractions low after 8:00 PM',
+                  '- Review handwritten goals every Sunday'
+                ],
+                '#047857',
+                'Page 1 of 2'
+              ),
+              createSamplePageIllustration(
+                'Weekend Action Checklist',
+                [
+                  '[x] Gather old notebooks from shelf',
+                  '[x] Snap photos of important pages',
+                  '[ ] Sort ideas into clear categories',
+                  '[ ] Export a backup copy to phone/drive'
+                ],
+                '#047857',
+                'Page 2 of 2'
+              )
+            ]
+          },
+          {
+            id: 'sample-3',
+            title: 'Creative Sparks & Personal Lists',
+            date: today,
+            categoryId: 'cat-ideas',
+            note: 'Random ideas, gift thoughts, and quotes scribbled on the back page of my small notepad.',
+            pinned: false,
+            isSample: true,
+            createdAt: Date.now() - 3000,
+            pages: [
+              createSamplePageIllustration(
+                'Ideas & Things to Try',
+                [
+                  '• Try sketching quick layouts before writing',
+                  '• Books recommended by friends:',
+                  '   - Atomic Habits',
+                  '   - Show Your Work',
+                  '• Favorite quote from today:',
+                  '  "Clarity comes from action, not thought."'
+                ],
+                '#B45309',
+                'Pocket Pad • p.42'
+              )
+            ]
+          }
+        ];
+      }
+
+      // ---------------------------------------------------------
+      // 3. INDEXEDDB STORAGE LAYER (WITH LOCALSTORAGE FALLBACK)
+      // ---------------------------------------------------------
+      const DB_NAME = 'MyPersonalVaultDB';
+      const DB_VERSION = 1;
+      const STORE_ENTRIES = 'entries';
+      const STORE_META = 'meta';
+
+      let dbInstance = null;
+      let useLocalStorageFallback = false;
+
+      function initDatabase() {
+        return new Promise((resolve) => {
+          if (!window.indexedDB) {
+            useLocalStorageFallback = true;
+            resolve();
+            return;
+          }
+          try {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onupgradeneeded = (event) => {
+              const db = event.target.result;
+              if (!db.objectStoreNames.contains(STORE_ENTRIES)) {
+                db.createObjectStore(STORE_ENTRIES, { keyPath: 'id' });
+              }
+              if (!db.objectStoreNames.contains(STORE_META)) {
+                db.createObjectStore(STORE_META, { keyPath: 'key' });
+              }
+            };
+            request.onsuccess = (event) => {
+              dbInstance = event.target.result;
+              resolve();
+            };
+            request.onerror = () => {
+              useLocalStorageFallback = true;
+              resolve();
+            };
+          } catch (err) {
+            useLocalStorageFallback = true;
+            resolve();
+          }
+        });
+      }
+
+      async function dbGetAllEntries() {
+        if (useLocalStorageFallback) {
+          try {
+            return JSON.parse(localStorage.getItem('vault_entries') || '[]');
+          } catch {
+            return [];
+          }
+        }
+        return new Promise((resolve) => {
+          const tx = dbInstance.transaction(STORE_ENTRIES, 'readonly');
+          const store = tx.objectStore(STORE_ENTRIES);
+          const req = store.getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        });
+      }
+
+      async function dbPutEntry(entry) {
+        if (useLocalStorageFallback) {
+          const all = await dbGetAllEntries();
+          const idx = all.findIndex((e) => e.id === entry.id);
+          if (idx >= 0) all[idx] = entry;
+          else all.push(entry);
+          localStorage.setItem('vault_entries', JSON.stringify(all));
+          return;
+        }
+        return new Promise((resolve, reject) => {
+          const tx = dbInstance.transaction(STORE_ENTRIES, 'readwrite');
+          const store = tx.objectStore(STORE_ENTRIES);
+          const req = store.put(entry);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      async function dbDeleteEntry(id) {
+        if (useLocalStorageFallback) {
+          const all = (await dbGetAllEntries()).filter((e) => e.id !== id);
+          localStorage.setItem('vault_entries', JSON.stringify(all));
+          return;
+        }
+        return new Promise((resolve, reject) => {
+          const tx = dbInstance.transaction(STORE_ENTRIES, 'readwrite');
+          const store = tx.objectStore(STORE_ENTRIES);
+          const req = store.delete(id);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      async function dbGetMeta(key) {
+        if (useLocalStorageFallback) {
+          try {
+            const raw = localStorage.getItem('vault_meta_' + key);
+            return raw ? JSON.parse(raw) : null;
+          } catch {
+            return null;
+          }
+        }
+        return new Promise((resolve) => {
+          const tx = dbInstance.transaction(STORE_META, 'readonly');
+          const store = tx.objectStore(STORE_META);
+          const req = store.get(key);
+          req.onsuccess = () => resolve(req.result ? req.result.value : null);
+          req.onerror = () => resolve(null);
+        });
+      }
+
+      async function dbSetMeta(key, value) {
+        if (useLocalStorageFallback) {
+          localStorage.setItem('vault_meta_' + key, JSON.stringify(value));
+          return;
+        }
+        return new Promise((resolve) => {
+          const tx = dbInstance.transaction(STORE_META, 'readwrite');
+          const store = tx.objectStore(STORE_META);
+          store.put({ key, value });
+          tx.oncomplete = () => resolve();
+        });
+      }
+
+      // ---------------------------------------------------------
+      // 4. CLIENT-SIDE IMAGE COMPRESSION (MAX 1650px, HIGH CLARITY)
+      //    Preserves sharp ink legibility while keeping storage fast.
+      // ---------------------------------------------------------
+      function compressHandwrittenImage(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+              const MAX_DIM = 1650;
+              let width = img.width;
+              let height = img.height;
+
+              if (width > MAX_DIM || height > MAX_DIM) {
+                if (width > height) {
+                  height = Math.round((height * MAX_DIM) / width);
+                  width = MAX_DIM;
+                } else {
+                  width = Math.round((width * MAX_DIM) / height);
+                  height = MAX_DIM;
+                }
+              }
+
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.fillStyle = '#FFFFFF';
+              ctx.fillRect(0, 0, width, height);
+              ctx.drawImage(img, 0, 0, width, height);
+
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+              resolve(compressedDataUrl);
+            };
+            img.onerror = () => reject(new Error('Could not decode image.'));
+            img.src = e.target.result;
+          };
+          reader.onerror = () => reject(new Error('Could not read file.'));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      // ---------------------------------------------------------
+      // 5. APPLICATION STATE
+      // ---------------------------------------------------------
+      let state = {
+        entries: [],
+        categories: [],
+        activeCategoryFilter: 'ALL',
+        pinnedOnly: false,
+        searchQuery: '',
+        draftPages: [],
+        readerEntryId: null,
+        readerPageIndex: 0,
+        readerZoomed: false,
+        deleteConfirmArmed: false,
+      };
+
+      // ---------------------------------------------------------
+      // 6. HELPER FUNCTIONS
+      // ---------------------------------------------------------
+      function getTodayISO() {
+        const now = new Date();
+        const offset = now.getTimezoneOffset() * 60000;
+        return new Date(now - offset).toISOString().split('T')[0];
+      }
+
+      function formatDisplayDate(isoDate) {
+        if (!isoDate) return '';
+        const parts = isoDate.split('-');
+        if (parts.length !== 3) return isoDate;
+        const dateObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        return dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+
+      function getCategoryById(id) {
+        return state.categories.find((c) => c.id === id) || state.categories[0] || DEFAULT_CATEGORIES[0];
+      }
+
+      function getColorClasses(colorIdx) {
+        return CATEGORY_COLORS[colorIdx % CATEGORY_COLORS.length];
+      }
+
+      let toastTimer = null;
+      function showToast(message, icon = '✓') {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-message').textContent = message;
+        document.getElementById('toast-icon').textContent = icon;
+        toast.classList.add('visible');
+
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.remove('visible');
+        }, 3000);
+      }
+
+      // ---------------------------------------------------------
+      // 7. RENDERING FUNCTIONS
+      // ---------------------------------------------------------
+      function renderCategoryPills() {
+        const container = document.getElementById('category-pills-container');
+        container.innerHTML = '';
+
+        // "All Entries" pill
+        const allActive = state.activeCategoryFilter === 'ALL';
+        const allBtn = document.createElement('button');
+        allBtn.type = 'button';
+        allBtn.className = `cat-pill ${allActive ? 'active' : ''}`;
+        allBtn.textContent = `All Entries (${state.entries.length})`;
+        allBtn.onclick = () => {
+          state.activeCategoryFilter = 'ALL';
+          renderAll();
+        };
+        container.appendChild(allBtn);
+
+        // Individual Category pills
+        state.categories.forEach((cat) => {
+          const count = state.entries.filter((e) => e.categoryId === cat.id).length;
+          const isActive = state.activeCategoryFilter === cat.id;
+          const color = getColorClasses(cat.colorIdx);
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `cat-pill ${isActive ? 'active' : ''}`;
+
+          const dot = document.createElement('span');
+          dot.className = `cat-dot ${isActive ? 'dot-active' : color.dotClass}`;
+
+          const label = document.createElement('span');
+          label.textContent = `${cat.name} (${count})`;
+
+          btn.appendChild(dot);
+          btn.appendChild(label);
+          btn.onclick = () => {
+            state.activeCategoryFilter = cat.id;
+            renderAll();
+          };
+          container.appendChild(btn);
+        });
+
+        // "+ Categories" manager pill button
+        const manageBtn = document.createElement('button');
+        manageBtn.type = 'button';
+        manageBtn.className = 'cat-pill-manage';
+        manageBtn.textContent = '+ Categories';
+        manageBtn.onclick = openCategoryModal;
+        container.appendChild(manageBtn);
+      }
+
+      function getFilteredEntries() {
+        const q = state.searchQuery.trim().toLowerCase();
+        return state.entries
+          .filter((entry) => {
+            if (state.activeCategoryFilter !== 'ALL' && entry.categoryId !== state.activeCategoryFilter) {
+              return false;
+            }
+            if (state.pinnedOnly && !entry.pinned) {
+              return false;
+            }
+            if (q) {
+              const cat = getCategoryById(entry.categoryId);
+              const haystack = `${entry.title} ${entry.note || ''} ${entry.date} ${cat.name}`.toLowerCase();
+              return haystack.includes(q);
+            }
+            return true;
+          })
+          .sort((a, b) => {
+            if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+            if (a.date !== b.date) return b.date.localeCompare(a.date);
+            return (b.createdAt || 0) - (a.createdAt || 0);
+          });
+      }
+
+      function renderEntriesGrid() {
+        const grid = document.getElementById('entries-grid');
+        const emptyState = document.getElementById('empty-state');
+        const sampleBanner = document.getElementById('sample-banner');
+
+        const hasSamples = state.entries.some((e) => e.isSample);
+        sampleBanner.classList.toggle('hidden', !hasSamples);
+
+        const filtered = getFilteredEntries();
+        const totalPagesStored = state.entries.reduce((sum, e) => sum + (e.pages ? e.pages.length : 0), 0);
+
+        document.getElementById('archive-count-label').textContent =
+          `Showing ${filtered.length} ${filtered.length === 1 ? 'entry' : 'entries'}`;
+        document.getElementById('total-pages-label').textContent =
+          `${totalPagesStored} total handwritten ${totalPagesStored === 1 ? 'page' : 'pages'} stored`;
+
+        grid.innerHTML = '';
+
+        if (filtered.length === 0) {
+          grid.classList.add('hidden');
+          emptyState.classList.remove('hidden');
+          if (state.entries.length > 0) {
+            document.getElementById('empty-title').textContent = 'No matching entries found';
+            document.getElementById('empty-subtitle').textContent = 'Try clearing your search or switching category filters.';
+          } else {
+            document.getElementById('empty-title').textContent = 'No handwritten pages here yet';
+            document.getElementById('empty-subtitle').textContent =
+              'Snap a photo of any page from your physical notebooks to keep it safe, organized, and searchable in one place.';
+          }
+          return;
+        }
+
+        grid.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+
+        filtered.forEach((entry) => {
+          const cat = getCategoryById(entry.categoryId);
+          const color = getColorClasses(cat.colorIdx);
+          const coverImage = entry.pages && entry.pages.length > 0 ? entry.pages[0] : '';
+          const pageCount = entry.pages ? entry.pages.length : 0;
+
+          const card = document.createElement('article');
+          card.className = 'entry-card';
+
+          card.innerHTML = `
+            <div class="card-thumb-wrap">
+              <img src="${coverImage}" alt="${escapeXml(entry.title)}" class="card-thumb-img" loading="lazy" />
+
+              <div class="card-top-overlay">
+                ${entry.isSample ? '<span class="sample-pill">Sample</span>' : '<span></span>'}
+                <button type="button" data-pin-id="${entry.id}" class="pin-btn ${entry.pinned ? 'pinned' : ''}" title="${entry.pinned ? 'Unpin entry' : 'Pin entry'}">
+                  <svg class="icon-xs" fill="${entry.pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  </svg>
+                </button>
+              </div>
+
+              <div class="card-bottom-overlay">
+                <span class="page-count-badge">
+                  <svg class="icon-xs" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  ${pageCount} ${pageCount === 1 ? 'page' : 'pages'}
+                </span>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div>
+                <div class="card-meta-row">
+                  <span class="category-badge ${color.badgeClass}">
+                    ${escapeXml(cat.name)}
+                  </span>
+                  <span class="card-date">${formatDisplayDate(entry.date)}</span>
+                </div>
+                <h3 class="card-title">${escapeXml(entry.title)}</h3>
+                ${
+                  entry.note
+                    ? `<p class="card-note">${escapeXml(entry.note)}</p>`
+                    : `<p class="card-note-empty">Tap to read handwritten page</p>`
+                }
+              </div>
+            </div>
+          `;
+
+          const pinBtn = card.querySelector('[data-pin-id]');
+          pinBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            entry.pinned = !entry.pinned;
+            await dbPutEntry(entry);
+            renderAll();
+            showToast(entry.pinned ? 'Pinned to top of vault' : 'Unpinned entry');
+          });
+
+          card.addEventListener('click', () => {
+            openReaderModal(entry.id, 0);
+          });
+
+          grid.appendChild(card);
+        });
+      }
+
+      function renderAll() {
+        renderCategoryPills();
+        renderEntriesGrid();
+      }
+
+      // ---------------------------------------------------------
+      // 8. ADD / EDIT ENTRY MODAL LOGIC
+      // ---------------------------------------------------------
+      const entryModal = document.getElementById('entry-modal');
+      const entryForm = document.getElementById('entry-form');
+
+      function populateCategoryDropdown(selectedId) {
+        const select = document.getElementById('entry-category');
+        select.innerHTML = '';
+        state.categories.forEach((cat) => {
+          const opt = document.createElement('option');
+          opt.value = cat.id;
+          opt.textContent = cat.name;
+          if (cat.id === selectedId) opt.selected = true;
+          select.appendChild(opt);
+        });
+      }
+
+      function renderDraftPagesPreview() {
+        const container = document.getElementById('uploaded-pages-preview');
+        container.innerHTML = '';
+
+        state.draftPages.forEach((dataUrl, idx) => {
+          const wrap = document.createElement('div');
+          wrap.className = 'draft-thumb';
+          wrap.innerHTML = `
+            <img src="${dataUrl}" alt="Page ${idx + 1}" />
+            <span class="draft-page-tag">p.${idx + 1}</span>
+            <button type="button" data-remove-page="${idx}" class="draft-remove-btn" title="Remove page">✕</button>
+          `;
+          wrap.querySelector('[data-remove-page]').addEventListener('click', () => {
+            state.draftPages.splice(idx, 1);
+            renderDraftPagesPreview();
+          });
+          container.appendChild(wrap);
+        });
+      }
+
+      function openAddEntryModal(editEntry = null) {
+        entryForm.reset();
+        document.getElementById('quick-new-cat-box').classList.add('hidden');
+
+        if (editEntry) {
+          document.getElementById('entry-modal-title').textContent = 'Edit Notebook Entry';
+          document.getElementById('save-entry-btn').textContent = 'Update Entry';
+          document.getElementById('entry-id').value = editEntry.id;
+          document.getElementById('entry-title').value = editEntry.title;
+          document.getElementById('entry-date').value = editEntry.date;
+          document.getElementById('entry-note').value = editEntry.note || '';
+          document.getElementById('entry-pinned').checked = !!editEntry.pinned;
+          populateCategoryDropdown(editEntry.categoryId);
+          state.draftPages = [...(editEntry.pages || [])];
+        } else {
+          document.getElementById('entry-modal-title').textContent = 'Add Handwritten Page';
+          document.getElementById('save-entry-btn').textContent = 'Save to Vault';
+          document.getElementById('entry-id').value = '';
+          document.getElementById('entry-date').value = getTodayISO();
+          const defaultCat =
+            state.activeCategoryFilter !== 'ALL' ? state.activeCategoryFilter : state.categories[0]?.id;
+          populateCategoryDropdown(defaultCat);
+          state.draftPages = [];
+        }
+
+        renderDraftPagesPreview();
+        entryModal.classList.remove('hidden');
+      }
+
+      function closeAddEntryModal() {
+        entryModal.classList.add('hidden');
+        state.draftPages = [];
+      }
+
+      async function handleImageFilesSelected(fileList) {
+        if (!fileList || fileList.length === 0) return;
+        const indicator = document.getElementById('image-processing-indicator');
+        indicator.classList.remove('hidden');
+
+        try {
+          for (let i = 0; i < fileList.length; i++) {
+            const file = fileList[i];
+            if (!file.type.startsWith('image/')) continue;
+            const compressed = await compressHandwrittenImage(file);
+            state.draftPages.push(compressed);
+          }
+          renderDraftPagesPreview();
+        } catch (err) {
+          showToast('Could not process one of the images', '!');
+        } finally {
+          indicator.classList.add('hidden');
+        }
+      }
+
+      // ---------------------------------------------------------
+      // 9. FULLSCREEN LIGHTBOX & HANDWRITING READER LOGIC
+      // ---------------------------------------------------------
+      const readerModal = document.getElementById('reader-modal');
+
+      function openReaderModal(entryId, pageIndex = 0) {
+        const entry = state.entries.find((e) => e.id === entryId);
+        if (!entry || !entry.pages || entry.pages.length === 0) return;
+
+        state.readerEntryId = entryId;
+        state.readerPageIndex = Math.max(0, Math.min(pageIndex, entry.pages.length - 1));
+        state.readerZoomed = false;
+        state.deleteConfirmArmed = false;
+
+        updateReaderUI();
+        readerModal.classList.remove('hidden');
+      }
+
+      function closeReaderModal() {
+        readerModal.classList.add('hidden');
+        state.readerEntryId = null;
+        state.readerZoomed = false;
+        state.deleteConfirmArmed = false;
+      }
+
+      function updateReaderUI() {
+        const entry = state.entries.find((e) => e.id === state.readerEntryId);
+        if (!entry) return;
+
+        const cat = getCategoryById(entry.categoryId);
+        const total = entry.pages.length;
+        const idx = state.readerPageIndex;
+
+        document.getElementById('reader-category-badge').textContent = cat.name;
+        document.getElementById('reader-date').textContent = formatDisplayDate(entry.date);
+        document.getElementById('reader-title').textContent = entry.title;
+        document.getElementById('reader-note-text').textContent =
+          entry.note ? `"${entry.note}"` : 'No typed summary added for this entry.';
+        document.getElementById('reader-page-counter').textContent = `Page ${idx + 1} of ${total}`;
+
+        // Delete button confirmation state
+        const delBtn = document.getElementById('reader-delete-btn');
+        const delLabel = document.getElementById('reader-delete-label');
+        if (state.deleteConfirmArmed) {
+          delBtn.classList.add('armed');
+          delLabel.textContent = 'Confirm Delete?';
+        } else {
+          delBtn.classList.remove('armed');
+          delLabel.textContent = 'Delete';
+        }
+
+        // Active image & Zoom state
+        const imgEl = document.getElementById('reader-active-image');
+        const viewport = document.getElementById('reader-image-viewport');
+        imgEl.src = entry.pages[idx];
+
+        if (state.readerZoomed) {
+          imgEl.classList.add('zoomed');
+          viewport.classList.add('zoomed');
+          document.getElementById('reader-zoom-label').textContent = 'Fit Screen';
+        } else {
+          imgEl.classList.remove('zoomed');
+          viewport.classList.remove('zoomed');
+          document.getElementById('reader-zoom-label').textContent = 'Zoom In';
+        }
+
+        // Prev / Next buttons
+        document.getElementById('reader-prev-btn').disabled = idx <= 0;
+        document.getElementById('reader-next-btn').disabled = idx >= total - 1;
+
+        // Thumbnail strip
+        const thumbStrip = document.getElementById('reader-thumbnails');
+        thumbStrip.innerHTML = '';
+        if (total > 1) {
+          entry.pages.forEach((src, pIdx) => {
+            const tBtn = document.createElement('button');
+            tBtn.type = 'button';
+            tBtn.className = `reader-thumb-btn ${pIdx === idx ? 'active' : ''}`;
+            tBtn.innerHTML = `<img src="${src}" alt="Page ${pIdx + 1}" />`;
+            tBtn.onclick = () => {
+              state.readerPageIndex = pIdx;
+              state.readerZoomed = false;
+              updateReaderUI();
+            };
+            thumbStrip.appendChild(tBtn);
+          });
+        }
+      }
+
+      // ---------------------------------------------------------
+      // 10. CATEGORY MANAGER MODAL
+      // ---------------------------------------------------------
+      const categoryModal = document.getElementById('category-modal');
+
+      function openCategoryModal() {
+        renderCategoryManagerList();
+        categoryModal.classList.remove('hidden');
+      }
+
+      function closeCategoryModal() {
+        categoryModal.classList.add('hidden');
+      }
+
+      function renderCategoryManagerList() {
+        const list = document.getElementById('category-manager-list');
+        list.innerHTML = '';
+        state.categories.forEach((cat) => {
+          const color = getColorClasses(cat.colorIdx);
+          const count = state.entries.filter((e) => e.categoryId === cat.id).length;
+
+          const row = document.createElement('div');
+          row.className = 'cat-manager-item';
+          row.innerHTML = `
+            <div class="cat-manager-left">
+              <span class="cat-dot ${color.dotClass}"></span>
+              <span>${escapeXml(cat.name)}</span>
+              <span class="cat-manager-count">(${count})</span>
+            </div>
+            ${
+              cat.isDefault
+                ? '<span class="cat-default-tag">Default</span>'
+                : `<button type="button" data-del-cat="${cat.id}" class="cat-remove-btn">Remove</button>`
+            }
+          `;
+
+          const delBtn = row.querySelector('[data-del-cat]');
+          if (delBtn) {
+            delBtn.addEventListener('click', async () => {
+              const fallbackCatId = state.categories[0].id;
+              for (const entry of state.entries) {
+                if (entry.categoryId === cat.id) {
+                  entry.categoryId = fallbackCatId;
+                  await dbPutEntry(entry);
+                }
+              }
+              state.categories = state.categories.filter((c) => c.id !== cat.id);
+              if (state.activeCategoryFilter === cat.id) state.activeCategoryFilter = 'ALL';
+              await dbSetMeta('categories', state.categories);
+              renderCategoryManagerList();
+              renderAll();
+              showToast('Category removed');
+            });
+          }
+
+          list.appendChild(row);
+        });
+      }
+
+      async function addNewCategory(name) {
+        const clean = name.trim();
+        if (!clean) return null;
+        const exists = state.categories.find((c) => c.name.toLowerCase() === clean.toLowerCase());
+        if (exists) return exists;
+
+        const newCat = {
+          id: 'cat-' + Date.now(),
+          name: clean,
+          colorIdx: state.categories.length % CATEGORY_COLORS.length,
+          isDefault: false,
+        };
+        state.categories.push(newCat);
+        await dbSetMeta('categories', state.categories);
+        renderAll();
+        return newCat;
+      }
+
+      // ---------------------------------------------------------
+      // 11. EXPORT & IMPORT JSON BACKUP
+      // ---------------------------------------------------------
+      function exportVaultBackup() {
+        const payload = {
+          app: 'My Personal Vault',
+          exportedAt: new Date().toISOString(),
+          categories: state.categories,
+          entries: state.entries,
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `my-personal-vault-backup-${getTodayISO()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Vault backup downloaded!');
+      }
+
+      async function importVaultBackup(file) {
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const data = JSON.parse(text);
+          if (!data || !Array.isArray(data.entries)) {
+            showToast('Invalid backup file format', '!');
+            return;
+          }
+
+          if (Array.isArray(data.categories)) {
+            for (const c of data.categories) {
+              if (!state.categories.some((existing) => existing.id === c.id)) {
+                state.categories.push(c);
+              }
+            }
+            await dbSetMeta('categories', state.categories);
+          }
+
+          let importedCount = 0;
+          for (const entry of data.entries) {
+            if (entry && entry.id && Array.isArray(entry.pages)) {
+              await dbPutEntry(entry);
+              const idx = state.entries.findIndex((e) => e.id === entry.id);
+              if (idx >= 0) state.entries[idx] = entry;
+              else state.entries.push(entry);
+              importedCount++;
+            }
+          }
+
+          renderAll();
+          showToast(`Restored ${importedCount} notebook entries!`);
+        } catch {
+          showToast('Could not read backup JSON file', '!');
+        }
+      }
+
+      // ---------------------------------------------------------
+      // 12. EVENT LISTENERS WIRING
+      // ---------------------------------------------------------
+      function bindEvents() {
+        document.getElementById('open-add-modal-top').addEventListener('click', () => openAddEntryModal());
+        document.getElementById('open-add-modal-mobile').addEventListener('click', () => openAddEntryModal());
+        document.getElementById('empty-add-btn').addEventListener('click', () => openAddEntryModal());
+
+        document.getElementById('close-entry-modal').addEventListener('click', closeAddEntryModal);
+        document.getElementById('cancel-entry-modal').addEventListener('click', closeAddEntryModal);
+
+        document.getElementById('camera-capture-input').addEventListener('change', (e) => {
+          handleImageFilesSelected(e.target.files);
+          e.target.value = '';
+        });
+        document.getElementById('gallery-upload-input').addEventListener('change', (e) => {
+          handleImageFilesSelected(e.target.files);
+          e.target.value = '';
+        });
+
+        const dropZone = document.getElementById('drop-zone');
+        ['dragenter', 'dragover'].forEach((evt) => {
+          dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-active');
+          });
+        });
+        ['dragleave', 'drop'].forEach((evt) => {
+          dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-active');
+          });
+        });
+        dropZone.addEventListener('drop', (e) => {
+          if (e.dataTransfer && e.dataTransfer.files) {
+            handleImageFilesSelected(e.dataTransfer.files);
+          }
+        });
+
+        document.getElementById('quick-new-cat-toggle').addEventListener('click', () => {
+          const box = document.getElementById('quick-new-cat-box');
+          box.classList.toggle('hidden');
+          if (!box.classList.contains('hidden')) {
+            document.getElementById('quick-new-cat-name').focus();
+          }
+        });
+        document.getElementById('quick-new-cat-save').addEventListener('click', async () => {
+          const input = document.getElementById('quick-new-cat-name');
+          const created = await addNewCategory(input.value);
+          if (created) {
+            populateCategoryDropdown(created.id);
+            input.value = '';
+            document.getElementById('quick-new-cat-box').classList.add('hidden');
+            showToast(`Added "${created.name}"`);
+          }
+        });
+
+        entryForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          if (state.draftPages.length === 0) {
+            showToast('Please snap or upload at least 1 page photo', '!');
+            return;
+          }
+
+          const existingId = document.getElementById('entry-id').value;
+          const title = document.getElementById('entry-title').value.trim() || 'Untitled Handwritten Page';
+          const date = document.getElementById('entry-date').value || getTodayISO();
+          const categoryId = document.getElementById('entry-category').value;
+          const note = document.getElementById('entry-note').value.trim();
+          const pinned = document.getElementById('entry-pinned').checked;
+
+          const entryObj = {
+            id: existingId || 'entry-' + Date.now(),
+            title,
+            date,
+            categoryId,
+            note,
+            pinned,
+            isSample: false,
+            pages: [...state.draftPages],
+            createdAt: existingId
+              ? state.entries.find((item) => item.id === existingId)?.createdAt || Date.now()
+              : Date.now(),
+          };
+
+          await dbPutEntry(entryObj);
+          const idx = state.entries.findIndex((item) => item.id === entryObj.id);
+          if (idx >= 0) state.entries[idx] = entryObj;
+          else state.entries.unshift(entryObj);
+
+          closeAddEntryModal();
+          renderAll();
+          showToast(existingId ? 'Notebook entry updated!' : 'Handwritten page saved to vault!');
+        });
+
+        const searchInput = document.getElementById('search-input');
+        const clearSearchBtn = document.getElementById('clear-search-btn');
+        searchInput.addEventListener('input', (e) => {
+          state.searchQuery = e.target.value;
+          clearSearchBtn.classList.toggle('hidden', !state.searchQuery);
+          renderEntriesGrid();
+        });
+        clearSearchBtn.addEventListener('click', () => {
+          state.searchQuery = '';
+          searchInput.value = '';
+          clearSearchBtn.classList.add('hidden');
+          renderEntriesGrid();
+        });
+
+        const pinnedBtn = document.getElementById('toggle-pinned-btn');
+        pinnedBtn.addEventListener('click', () => {
+          state.pinnedOnly = !state.pinnedOnly;
+          const icon = document.getElementById('pinned-filter-icon');
+          if (state.pinnedOnly) {
+            pinnedBtn.classList.add('active');
+            icon.setAttribute('fill', 'currentColor');
+          } else {
+            pinnedBtn.classList.remove('active');
+            icon.setAttribute('fill', 'none');
+          }
+          renderEntriesGrid();
+        });
+
+        document.getElementById('clear-samples-btn').addEventListener('click', async () => {
+          const samples = state.entries.filter((e) => e.isSample);
+          for (const s of samples) {
+            await dbDeleteEntry(s.id);
+          }
+          state.entries = state.entries.filter((e) => !e.isSample);
+          renderAll();
+          showToast('Sample entries cleared');
+        });
+
+        document.getElementById('close-reader-btn').addEventListener('click', closeReaderModal);
+        document.getElementById('reader-zoom-btn').addEventListener('click', () => {
+          state.readerZoomed = !state.readerZoomed;
+          updateReaderUI();
+        });
+        document.getElementById('reader-active-image').addEventListener('click', () => {
+          state.readerZoomed = !state.readerZoomed;
+          updateReaderUI();
+        });
+        document.getElementById('reader-prev-btn').addEventListener('click', () => {
+          if (state.readerPageIndex > 0) {
+            state.readerPageIndex--;
+            state.readerZoomed = false;
+            updateReaderUI();
+          }
+        });
+        document.getElementById('reader-next-btn').addEventListener('click', () => {
+          const entry = state.entries.find((e) => e.id === state.readerEntryId);
+          if (entry && state.readerPageIndex < entry.pages.length - 1) {
+            state.readerPageIndex++;
+            state.readerZoomed = false;
+            updateReaderUI();
+          }
+        });
+        document.getElementById('reader-edit-btn').addEventListener('click', () => {
+          const entry = state.entries.find((e) => e.id === state.readerEntryId);
+          closeReaderModal();
+          if (entry) openAddEntryModal(entry);
+        });
+        document.getElementById('reader-delete-btn').addEventListener('click', async () => {
+          if (!state.deleteConfirmArmed) {
+            state.deleteConfirmArmed = true;
+            updateReaderUI();
+            return;
+          }
+          const idToDelete = state.readerEntryId;
+          await dbDeleteEntry(idToDelete);
+          state.entries = state.entries.filter((e) => e.id !== idToDelete);
+          closeReaderModal();
+          renderAll();
+          showToast('Entry deleted from vault');
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (readerModal.classList.contains('hidden')) return;
+          if (e.key === 'Escape') closeReaderModal();
+          if (e.key === 'ArrowLeft') document.getElementById('reader-prev-btn').click();
+          if (e.key === 'ArrowRight') document.getElementById('reader-next-btn').click();
+        });
+
+        document.getElementById('close-category-modal').addEventListener('click', closeCategoryModal);
+        document.getElementById('add-category-form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const input = document.getElementById('new-category-input');
+          const created = await addNewCategory(input.value);
+          if (created) {
+            input.value = '';
+            renderCategoryManagerList();
+            showToast(`Added "${created.name}"`);
+          }
+        });
+
+        const backupBtn = document.getElementById('backup-menu-btn');
+        const backupDropdown = document.getElementById('backup-dropdown');
+        backupBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          backupDropdown.classList.toggle('hidden');
+        });
+        document.addEventListener('click', () => {
+          backupDropdown.classList.add('hidden');
+        });
+        document.getElementById('export-json-btn').addEventListener('click', () => {
+          backupDropdown.classList.add('hidden');
+          exportVaultBackup();
+        });
+        document.getElementById('import-json-input').addEventListener('change', (e) => {
+          backupDropdown.classList.add('hidden');
+          importVaultBackup(e.target.files[0]);
+          e.target.value = '';
+        });
+      }
+
+      // ---------------------------------------------------------
+      // 13. BOOTSTRAP APPLICATION
+      // ---------------------------------------------------------
+      async function bootstrap() {
+        await initDatabase();
+
+        const savedCategories = await dbGetMeta('categories');
+        if (savedCategories && Array.isArray(savedCategories) && savedCategories.length > 0) {
+          state.categories = savedCategories;
+        } else {
+          state.categories = [...DEFAULT_CATEGORIES];
+          await dbSetMeta('categories', state.categories);
+        }
+
+        const initialized = await dbGetMeta('initialized');
+        const existingEntries = await dbGetAllEntries();
+
+        if (!initialized && existingEntries.length === 0) {
+          const samples = buildInitialSampleEntries();
+          for (const sample of samples) {
+            await dbPutEntry(sample);
+          }
+          state.entries = samples;
+          await dbSetMeta('initialized', true);
+        } else {
+          state.entries = existingEntries;
+        }
+
+        bindEvents();
+        renderAll();
+      }
+
+      bootstrap();
+    })();
+  </script>
+</body>
+</html>
